@@ -24,6 +24,8 @@
 
     <properties>
         <java.version>25</java.version>
+        <spring-kafka.version>3.3.16</spring-kafka.version>
+        <postgresql.version>42.7.12</postgresql.version>
     </properties>
 
 </project>
