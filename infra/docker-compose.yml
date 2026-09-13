@@ -37,5 +37,16 @@ services:
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_INIT_LIMIT: 5
 
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.1
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+      JVM_OPTS: "-Xms32M -Xmx64M"
+    depends_on:
+      - kafka  
+
+
 volumes:
   postgres-data:

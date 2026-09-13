@@ -22,8 +22,8 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
-        @Mock
-        private PaymentEventPublisher paymentEventPublisher;
+    @Mock
+    private PaymentOutboxService paymentOutboxService;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -43,11 +43,11 @@ class PaymentServiceTest {
 
         assertThat(result.getId()).isEqualTo(paymentId);
         verify(paymentRepository, never()).save(org.mockito.ArgumentMatchers.any(Payment.class));
-        verifyNoInteractions(paymentEventPublisher);
+        verifyNoInteractions(paymentOutboxService);
     }
 
     @Test
-    void publishesAcceptedEventForNewPayment() {
+    void recordsAcceptedEventInOutboxForNewPayment() {
         PaymentRequest request = new PaymentRequest("account-1", "account-2",
                 new BigDecimal("25.00"), "USD");
         Payment saved = new Payment("client-1", "request-124", "account-1",
@@ -61,9 +61,6 @@ class PaymentServiceTest {
         Payment result = paymentService.create("client-1", "request-124", request);
 
         assertThat(result).isSameAs(saved);
-        verify(paymentEventPublisher).publishAccepted(org.mockito.ArgumentMatchers.argThat(event ->
-                event.paymentId().equals(saved.getId())
-                        && event.amount().compareTo(new BigDecimal("25.00")) == 0
-                        && event.currency().equals("USD")));
+        verify(paymentOutboxService).recordAccepted(saved);
     }
 }
