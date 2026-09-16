@@ -9,13 +9,16 @@ public class PaymentProcessingService {
     private final AccountRepository accountRepository;
     private final LedgerEntryRepository ledgerEntryRepository;
     private final ProcessedPaymentRepository processedPaymentRepository;
+    private final ProcessorOutboxService processorOutboxService;
 
     public PaymentProcessingService(AccountRepository accountRepository,
                                     LedgerEntryRepository ledgerEntryRepository,
-                                    ProcessedPaymentRepository processedPaymentRepository) {
+                                    ProcessedPaymentRepository processedPaymentRepository,
+                                    ProcessorOutboxService processorOutboxService) {
         this.accountRepository = accountRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
         this.processedPaymentRepository = processedPaymentRepository;
+        this.processorOutboxService = processorOutboxService;
     }
 
     @Transactional
@@ -42,6 +45,7 @@ public class PaymentProcessingService {
         ledgerEntryRepository.save(new LedgerEntry(event.paymentId(), destination.getAccountId(),
                 LedgerEntry.EntryType.CREDIT, event.amount(), event.currency()));
         processedPaymentRepository.save(new ProcessedPayment(event.paymentId()));
+        processorOutboxService.recordProcessed(event);
     }
 
     private void validateCurrency(Account source, Account destination, PaymentAcceptedEvent event) {

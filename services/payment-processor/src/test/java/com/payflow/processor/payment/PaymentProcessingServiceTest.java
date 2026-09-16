@@ -28,6 +28,9 @@ class PaymentProcessingServiceTest {
     @Mock
     private ProcessedPaymentRepository processedPaymentRepository;
 
+    @Mock
+    private ProcessorOutboxService processorOutboxService;
+
     @InjectMocks
     private PaymentProcessingService paymentProcessingService;
 
@@ -49,6 +52,7 @@ class PaymentProcessingServiceTest {
         verify(ledgerEntryRepository, org.mockito.Mockito.times(2))
                 .save(org.mockito.ArgumentMatchers.any(LedgerEntry.class));
         verify(processedPaymentRepository).save(org.mockito.ArgumentMatchers.any(ProcessedPayment.class));
+        verify(processorOutboxService).recordProcessed(event);
     }
 
     @Test
@@ -59,6 +63,7 @@ class PaymentProcessingServiceTest {
         paymentProcessingService.process(event(paymentId, "account-001", "vendor-001"));
 
         verifyNoInteractions(accountRepository, ledgerEntryRepository);
+        verifyNoInteractions(processorOutboxService);
         verify(processedPaymentRepository, never())
                 .save(org.mockito.ArgumentMatchers.any(ProcessedPayment.class));
     }
