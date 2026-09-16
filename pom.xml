@@ -20,6 +20,7 @@
 
     <modules>
         <module>services/payment-intake</module>
+        <module>services/payment-processor</module>
     </modules>
 
     <properties>
