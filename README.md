@@ -10,15 +10,18 @@ The repository currently contains:
 
    - A Java 25 Maven multi-module build.
 - The initial `payment-intake` Spring Boot service.
+- The `payment-processor` Spring Boot service with account balances and a double-entry ledger.
 - Local PostgreSQL and Kafka infrastructure definitions.
 - Actuator health, metrics, and Kubernetes probe endpoints.
 - A PostgreSQL-backed `POST /payments` intake API.
 - Flyway-managed schema migration for the `payments` table.
 - Validation for payment amount and ISO-style three-letter currency codes.
 - Idempotency protection using `Client-Id` and `Idempotency-Key`.
-- A unit test proving that a retry does not create a second payment.
+- A transactional outbox that records `payment.accepted` events with the payment.
+- A Kafka consumer that applies idempotent double-entry ledger processing.
+- Reconciliation checks that verify matching debit and credit entries.
 
-Kafka is configured locally but is not yet used by the application. The next slice will publish an accepted payment event.
+Kafka is configured locally and carries the `payment.accepted` event from intake to processing.
 
 ## What We Have Built
 
@@ -133,8 +136,8 @@ Run the focused verification with:
 
 - Authentication is not implemented yet; `Client-Id` is currently an identifying header, not proof of identity. JWT resource-server security comes in a later phase.
 - The application lookup plus unique constraint protects duplicate creation, but the HTTP response does not yet distinguish a first submission from an idempotent replay. We can add that contract deliberately later.
-- There is no outbox yet. Publishing an event after the database commit will be the next consistency problem to solve with Kafka and an outbox design.
-- There is no account-balance or double-entry ledger yet. `RECEIVED` is only an instruction record.
+- The intake outbox relay currently marks an event published after handing it to Kafka; production should add producer acknowledgements and retry/dead-letter handling.
+- The processor ledger currently uses seeded local accounts and shares PostgreSQL with intake for learning simplicity.
 - The current test is a unit test. A Testcontainers integration test should verify Flyway and real PostgreSQL behavior once Docker is consistently available.
 - Kafka is present in local infrastructure but no event is published yet.
 
@@ -265,16 +268,22 @@ Kafka consumers should assume at-least-once delivery. The consumer will store a 
 
 I would add a transactional outbox, explicit producer delivery handling, schema compatibility/versioning, consumer idempotency, retry topics and a dead-letter topic, security between clients and brokers, metrics for publish latency and failures, and integration tests against Kafka.
 
-## Next Reliability Slice: Transactional Outbox
+## Implemented Reliability Slice: Transactional Outbox
 
 Before adding a processing consumer, we should close the dual-write gap:
 
 1. Add an `outbox_events` table.
 2. Save the payment and its `payment.accepted` event in one database transaction.
 3. Publish unpublished outbox rows from a scheduled worker.
-4. Mark an event published only after Kafka acknowledges it.
+4. Mark an event published after the Kafka send is initiated; producer acknowledgement handling remains a production hardening task.
 5. Make the worker safe to retry.
 6. Add a failure test proving an unsent event remains available for retry.
+
+## Processing And Reconciliation Slice
+
+The `payment-processor` service consumes `payment.accepted` and applies the transfer in one database transaction. It debits the source account, credits the destination account, writes one `DEBIT` and one `CREDIT` ledger entry, and stores the payment ID in `processed_payments`. A redelivered Kafka event becomes a no-op.
+
+`ReconciliationService` verifies the accounting invariant for a payment: exactly one debit and one credit must exist, with matching amounts and currencies. This is an internal ledger reconciliation check; external settlement reconciliation will be added later.
 
 ## Setup on macOS
 

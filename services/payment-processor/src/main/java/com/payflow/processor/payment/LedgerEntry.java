@@ -56,6 +56,12 @@ public class LedgerEntry {
         createdAt = Instant.now();
     }
 
+    public UUID getPaymentId() { return paymentId; }
+    public String getAccountId() { return accountId; }
+    public EntryType getType() { return type; }
+    public BigDecimal getAmount() { return amount; }
+    public String getCurrency() { return currency; }
+
     public enum EntryType {
         DEBIT,
         CREDIT
