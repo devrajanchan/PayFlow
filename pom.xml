@@ -21,6 +21,7 @@
     <modules>
         <module>services/payment-intake</module>
         <module>services/payment-processor</module>
+        <module>services/payment-notification</module>
     </modules>
 
     <properties>
