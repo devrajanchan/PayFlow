@@ -12,6 +12,8 @@ spring:
   flyway:
     enabled: true
     table: payment_processor_flyway_history
+    baseline-on-migrate: true
+    baseline-version: 0
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
