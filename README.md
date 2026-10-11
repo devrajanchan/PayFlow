@@ -359,4 +359,4 @@ For each slice, we will follow this loop:
 
 ## Cloud cost guardrail
 
-AWS is optional and comes after the local Kubernetes deployment. Before any AWS experiment, configure a billing alarm, confirm free-tier eligibility for the account and region, and destroy resources with Terraform immediately after use. Free-tier eligibility and pricing can change.
+AWS is optional and comes after the local Kubernetes deployment. The first AWS learning slice is Terraform configuration for an EKS cluster, one managed node, and ECR repositories; it does not create resources until `terraform apply` is run. Before any apply, configure an AWS budget and billing alarm, confirm current pricing for the account and region, and restrict the Kubernetes API endpoint to your public IP. EKS and its worker node incur ongoing charges, so destroy the environment immediately after practice. See [the Terraform guide](infra/terraform/aws/README.md) for the file walkthrough and safe workflow. Free-tier eligibility and pricing can change.
