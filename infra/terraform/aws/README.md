@@ -11,6 +11,7 @@ This configuration describes an AWS VPC, an EKS cluster with one managed worker 
 | `main.tf` | Creates two public subnets across availability zones, internet routing, EKS IAM roles and policies, the cluster, its single-node managed node group, and three ECR repositories. |
 | `outputs.tf` | Prints the cluster name, region, ECR URLs, and the `kubectl` configuration command after an apply. |
 | `terraform.tfvars.example` | Shows the required input shape. Copy it to `terraform.tfvars` and replace the documentation-only IP address with your own public IPv4 address using a `/32` mask. |
+| `terraform.tftest.hcl` | Runs plan-level tests with a mocked AWS provider, checking the subnet count, node count, ECR repository count, endpoint allowlist, and invalid CIDR rejection without AWS credentials. |
 | `.terraform.lock.hcl` | Records the selected provider version and checksums for repeatable installs. Commit this file; do not commit `.terraform/` or state files. |
 
 ## Learning Workflow
@@ -24,12 +25,15 @@ This configuration describes an AWS VPC, an EKS cluster with one managed worker 
    terraform init
    terraform fmt -check -recursive
    terraform validate
+   terraform test
    aws sts get-caller-identity
    terraform plan
    ```
 
 5. Review the plan and cost implications before deciding whether to run `terraform apply`. Do not apply this learning environment without an explicit decision to incur AWS charges.
 6. If resources were applied, use `terraform destroy` as soon as the exercise is finished, then verify the resources are gone in AWS.
+
+The `terraform test` step is safe to run before AWS access is configured. It uses a mock provider to evaluate plans and test our infrastructure intent without creating AWS resources.
 
 Terraform uses local state for this first exercise. State can contain sensitive infrastructure metadata, so it is ignored by Git. Local state is suitable only for an individual learning exercise; shared or production environments need a secured remote backend with locking and access controls.
 
