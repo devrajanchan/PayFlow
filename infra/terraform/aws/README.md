@@ -1,6 +1,22 @@
 # PayFlow AWS Terraform Learning Slice
 
-This configuration describes an AWS VPC, an EKS cluster with one managed worker node, and one ECR repository per PayFlow service. It is a learning environment, not a production architecture. Creating the cluster and node incurs ongoing AWS charges. Nothing is created by `terraform init`, `fmt`, or `validate`; `terraform apply` is the operation that provisions resources.
+This configuration describes an AWS VPC, an EKS cluster with one managed worker node, and one ECR repository per PayFlow service. It is a learning environment, not a production architecture. Creating the cluster and node incurs ongoing AWS charges. Nothing is created by `terraform init`, `fmt`, `validate`, `test`, or `plan`; `terraform apply` is the operation that provisions resources.
+
+## Zero-Cost Gate
+
+The current requirement is **no AWS charges**. Do not run `terraform apply` for this configuration under that requirement. EKS has a per-cluster control-plane charge, and the worker node, public IPv4 addresses, storage, and network usage can add charges. Free-tier offers or account credits are account- and time-dependent and are not a guarantee that this stack will cost $0. A budget alert is useful, but it is not a hard spending cap and may arrive after usage has accrued.
+
+Keep using the local Docker Compose/Kubernetes setup and offline `terraform test` for now. A real AWS deployment is a separate, opt-in learning exercise only after you approve a maximum spend and check the AWS pricing calculator for your account, region, and planned runtime. I will not create AWS resources unless you explicitly authorize that cost-bearing step.
+
+If you later decide to proceed with a spend limit, the required inputs are:
+
+1. The AWS account you intend to use, with AWS CLI credentials configured locally through IAM Identity Center or another approved method. Never paste keys or tokens into chat or repository files.
+2. The target AWS region.
+3. Your current public IPv4 address in `/32` CIDR notation for the EKS API allowlist.
+4. The maximum total spend you explicitly approve, including cluster runtime, node runtime, public IPv4, storage, and data transfer.
+5. The planned start and destroy times. `terraform destroy` must be run after the exercise, and the account must be checked afterward for leftover resources.
+
+If the maximum approved spend must remain exactly $0, do not deploy this EKS configuration to AWS. We can continue learning Terraform locally with plan tests and simulated providers instead.
 
 ## File Guide
 
