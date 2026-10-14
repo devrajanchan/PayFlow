@@ -1,6 +1,6 @@
 # PayFlow AWS Terraform Learning Slice
 
-This configuration describes an AWS VPC, an EKS cluster with one managed worker node, and one ECR repository per PayFlow service. It is a learning environment, not a production architecture. Creating the cluster and node incurs ongoing AWS charges. Nothing is created by `terraform init`, `fmt`, `validate`, `test`, or `plan`; `terraform apply` is the operation that provisions resources.
+This configuration describes an AWS VPC, an EKS cluster with one managed worker node, and one ECR repository per PayFlow service. It is a learning environment, not a production architecture. Creating the cluster and node incurs ongoing AWS charges. `terraform init`, `fmt`, `validate`, `test`, and `plan` do not create the planned infrastructure; `terraform apply` provisions resources. A real AWS-provider `plan` may still require credentials and make AWS API/read calls. The mocked `terraform test` is the offline planning exercise.
 
 ## Zero-Cost Gate
 
@@ -46,10 +46,10 @@ If the maximum approved spend must remain exactly $0, do not deploy this EKS con
    terraform plan
    ```
 
-5. Review the plan and cost implications before deciding whether to run `terraform apply`. Do not apply this learning environment without an explicit decision to incur AWS charges.
+5. Review the plan and cost implications. Under the current zero-cost requirement, stop here: do not run `terraform apply` for this EKS configuration.
 6. If resources were applied, use `terraform destroy` as soon as the exercise is finished, then verify the resources are gone in AWS.
 
-The `terraform test` step is safe to run before AWS access is configured. It uses a mock provider to evaluate plans and test our infrastructure intent without creating AWS resources.
+The `terraform test` step is safe to run before AWS access is configured. It uses a mock provider to evaluate plans and test our infrastructure intent without creating AWS resources. See [the local Kubernetes lab](../../kubernetes/README.md) for the zero-AWS-cost runtime path with kind.
 
 Terraform uses local state for this first exercise. State can contain sensitive infrastructure metadata, so it is ignored by Git. Local state is suitable only for an individual learning exercise; shared or production environments need a secured remote backend with locking and access controls.
 

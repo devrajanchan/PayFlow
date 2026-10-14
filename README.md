@@ -360,3 +360,5 @@ For each slice, we will follow this loop:
 ## Cloud cost guardrail
 
 AWS is optional and comes after the local Kubernetes deployment. The first AWS learning slice is Terraform configuration for an EKS cluster, one managed node, and ECR repositories; it does not create resources until `terraform apply` is run. **The current requirement is no AWS charges, so do not apply this EKS configuration.** EKS and related network/compute resources can incur charges, and free-tier offers or credits cannot guarantee a $0 deployment. See [the Terraform guide](infra/terraform/aws/README.md) for the cost gate, local alternatives, and the inputs needed if you later authorize a spend limit.
+
+For a no-AWS-cost Kubernetes deployment practice loop, use the [kind local learning lab](infra/kubernetes/README.md). It runs the current services, PostgreSQL, and Kafka on Docker Desktop and includes resource caps, health probes, Kafdrop, and an end-to-end exercise.
